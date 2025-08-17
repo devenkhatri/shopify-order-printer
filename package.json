@@ -22,6 +22,7 @@
     "deploy:production": "./scripts/deploy-production.sh",
     "deploy:vercel": "vercel --prod",
     "deploy:railway": "railway up",
+    "setup:local": "./scripts/setup-local-dev.sh",
     "setup:ssl": "./scripts/setup-ssl.sh",
     "setup:db": "node -e \"console.log('Run the SQL script in scripts/setup-production-db.sql on your production database')\"",
     "docker:build": "docker build -t shopify-order-printer .",

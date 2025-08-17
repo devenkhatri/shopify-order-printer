@@ -1,8 +1,127 @@
-# Shopify App Template for Node
+# Shopify Order Printer - Indian GST Compliance
 
-This is a template for building a [Shopify app](https://shopify.dev/docs/apps/getting-started) using Node and React. It contains the basics for building a Shopify app.
+A specialized Shopify app for Indian T-shirt stores that provides automated GST calculations and professional order printing capabilities.
 
-Rather than cloning this repo, you can use your preferred package manager and the Shopify CLI with [these steps](#installing-the-template).
+## Features
+
+- **🇮🇳 Indian GST Compliance**: Automatic CGST/SGST/IGST calculations based on customer location
+- **👕 T-shirt Store Specialized**: Optimized for textile businesses with size, color, and design details
+- **🖨️ Professional Printing**: Custom templates with business branding and bulk PDF generation
+- **📊 CSV Export**: Detailed order data with GST breakdowns for accounting
+- **⚡ Real-time Integration**: Native Shopify integration with webhook support
+
+## 📋 Complete Setup Guide
+
+**For detailed setup instructions including environment variables configuration, database setup, and troubleshooting, see:**
+
+**[📖 LOCAL_DEVELOPMENT_SETUP.md](./LOCAL_DEVELOPMENT_SETUP.md)**
+
+This comprehensive guide covers:
+- ✅ Step-by-step environment variable configuration
+- ✅ Database setup (SQLite, PostgreSQL, MySQL)
+- ✅ Shopify app creation and configuration
+- ✅ Security secrets generation
+- ✅ Common troubleshooting solutions
+- ✅ Development workflow best practices
+
+## Quick Start
+
+### Prerequisites
+
+1. [Node.js 18+](https://nodejs.org/en/download/)
+2. [Shopify Partner Account](https://partners.shopify.com/signup)
+3. [Development Store](https://help.shopify.com/en/partners/dashboard/development-stores#create-a-development-store)
+4. [Shopify CLI](https://shopify.dev/docs/apps/tools/cli/installation)
+
+### Installation
+
+#### Option 1: Automated Setup (Recommended)
+
+```bash
+# Clone the repository
+git clone <your-repo-url>
+cd shopify-order-printer
+
+# Run automated setup script
+npm run setup:local
+
+# Follow the prompts and configure your Shopify app credentials
+# Then start development server
+npm run dev
+```
+
+#### Option 2: Manual Setup
+
+```bash
+# Clone the repository
+git clone <your-repo-url>
+cd shopify-order-printer
+
+# Install dependencies
+npm install
+
+# Set up environment variables (see detailed guide above)
+cp .env.example .env.local
+# Edit .env.local with your configuration
+
+# Start development server
+npm run dev
+```
+
+## Environment Variables Quick Reference
+
+Create `.env.local` with these required variables:
+
+```bash
+# Shopify Configuration (Required)
+SHOPIFY_API_KEY=your_api_key_from_partner_dashboard
+SHOPIFY_API_SECRET=your_api_secret_from_partner_dashboard
+SHOPIFY_WEBHOOK_SECRET=your_webhook_secret_32_chars_min
+NEXT_PUBLIC_SHOPIFY_API_KEY=your_api_key_from_partner_dashboard
+
+# Security (Required)
+SESSION_SECRET=your_very_strong_session_secret_32_chars_min
+
+# Database (Required)
+DATABASE_URL=sqlite:database.sqlite
+
+# Indian GST Configuration (Required)
+DEFAULT_STORE_STATE=Gujarat
+DEFAULT_GST_RATES_BELOW_1000=0.05
+DEFAULT_GST_RATES_ABOVE_1000=0.12
+
+# Development
+NODE_ENV=development
+LOG_LEVEL=debug
+```
+
+**⚠️ Important**: Generate secure secrets using:
+```bash
+node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+```
+
+## Development Commands
+
+```bash
+# Start development server
+npm run dev
+
+# Run tests
+npm run test
+npm run test:run
+
+# Type checking
+npm run type-check
+
+# Linting
+npm run lint
+
+# Build for production
+npm run build
+
+# Health check
+npm run health:check
+```
 
 ## Benefits
 
