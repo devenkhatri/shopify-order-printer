@@ -36,3 +36,20 @@ class MemorySessionStorage {
 }
 
 export const sessionStorage = new MemorySessionStorage()
+
+// Helper function to get session from request
+export async function getSession(request: Request): Promise<{ shop: string; accessToken: string } | null> {
+  // This is a simplified implementation
+  // In a real app, you would extract the session from cookies, headers, or other auth mechanisms
+  const authHeader = request.headers.get('authorization')
+  if (!authHeader) {
+    return null
+  }
+
+  // For now, return a mock session
+  // In production, you would validate the token and return the actual session
+  return {
+    shop: 'test-shop.myshopify.com',
+    accessToken: 'test-token'
+  }
+}

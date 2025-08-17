@@ -1,16 +1,20 @@
 import { Session } from '@shopify/shopify-api';
 import { ShopifyOrder, OrderWithGST } from '../../types/shopify';
 import { GSTService } from './gstService';
-import { orderGraphQLService } from './orderGraphQLService';
+import { OrderGraphQLService } from './orderGraphQLService';
 
 /**
  * Service for managing orders with GST calculations
  */
 export class OrderService {
   private gstService: GSTService;
+  private orderGraphQLService?: OrderGraphQLService;
 
-  constructor(storeState: string = 'MH') {
+  constructor(storeState: string = 'MH', session?: Session) {
     this.gstService = new GSTService(storeState);
+    if (session) {
+      this.orderGraphQLService = new OrderGraphQLService(session);
+    }
   }
 
   /**
@@ -35,19 +39,22 @@ export class OrderService {
   ): Promise<{ orders: OrderWithGST[]; hasNextPage: boolean; cursor?: string }> {
     try {
       // Fetch orders from Shopify using GraphQL service
-      const ordersResponse = await orderGraphQLService.getOrders(session, {
+      if (!this.orderGraphQLService) {
+        this.orderGraphQLService = new OrderGraphQLService(session);
+      }
+      const ordersResponse = await this.orderGraphQLService.getOrders({
         first: options.limit || 50,
         after: options.cursor || undefined,
         query: this.buildOrderQuery(options)
       });
 
       // Add GST breakdown to each order
-      const ordersWithGST = await this.gstService.addGSTToOrders(ordersResponse.orders);
+      const ordersWithGST = await this.gstService.addGSTToOrders(ordersResponse.data);
 
       return {
         orders: ordersWithGST,
-        hasNextPage: ordersResponse.hasNextPage,
-        cursor: ordersResponse.cursor
+        hasNextPage: ordersResponse.pageInfo.hasNextPage,
+        cursor: ordersResponse.pageInfo.endCursor
       };
     } catch (error) {
       console.error('Failed to fetch orders with GST:', error);
@@ -60,7 +67,11 @@ export class OrderService {
    */
   async getOrderById(session: Session, orderId: string): Promise<OrderWithGST | null> {
     try {
-      const order = await orderGraphQLService.getOrderById(session, orderId);
+      if (!this.orderGraphQLService) {
+        this.orderGraphQLService = new OrderGraphQLService(session);
+      }
+      
+      const order = await this.orderGraphQLService.getOrder(orderId);
       
       if (!order) {
         return null;
@@ -93,20 +104,21 @@ export class OrderService {
 
       if (options.orderIds && options.orderIds.length > 0) {
         // Fetch specific orders by IDs
-        orders = await Promise.all(
-          options.orderIds.map(async (id) => {
-            const order = await orderGraphQLService.getOrderById(session, id);
-            return order;
-          })
-        ).then(results => results.filter(Boolean) as ShopifyOrder[]);
+        if (!this.orderGraphQLService) {
+          this.orderGraphQLService = new OrderGraphQLService(session);
+        }
+        orders = await this.orderGraphQLService.getOrdersByIds(options.orderIds);
       } else {
         // Fetch orders by date range
-        const query = `created_at:>='${options.dateFrom.toISOString()}' AND created_at:<='${options.dateTo.toISOString()}'`;
-        const ordersResponse = await orderGraphQLService.getOrders(session, {
-          first: 250, // Maximum for bulk operations
-          query
-        });
-        orders = ordersResponse.orders;
+        if (!this.orderGraphQLService) {
+          this.orderGraphQLService = new OrderGraphQLService(session);
+        }
+        const ordersResponse = await this.orderGraphQLService.getOrdersByDateRange(
+          options.dateFrom,
+          options.dateTo,
+          {} // Default options
+        );
+        orders = ordersResponse;
       }
 
       // Add GST breakdown to orders
@@ -141,7 +153,10 @@ export class OrderService {
     orderTotal: any;
   }> {
     try {
-      const order = await orderGraphQLService.getOrderById(session, orderId);
+      if (!this.orderGraphQLService) {
+        this.orderGraphQLService = new OrderGraphQLService(session);
+      }
+      const order = await this.orderGraphQLService.getOrder(orderId);
       
       if (!order) {
         throw new Error(`Order ${orderId} not found`);

@@ -1,10 +1,5 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Enable experimental features for App Router
-  experimental: {
-    appDir: true,
-  },
-  
   // Configure for Shopify embedded app
   async headers() {
     return [
@@ -53,13 +48,6 @@ const nextConfig = {
 
   // Configure webpack for Shopify dependencies
   webpack: (config, { isServer }) => {
-    // Handle node modules that need to be transpiled
-    config.transpilePackages = [
-      '@shopify/polaris',
-      '@shopify/app-bridge',
-      '@shopify/app-bridge-react'
-    ]
-
     // Resolve fallbacks for Node.js modules in browser
     if (!isServer) {
       config.resolve.fallback = {
@@ -128,4 +116,4 @@ const nextConfig = {
   },
 }
 
-module.exports = nextConfig
+export default nextConfig

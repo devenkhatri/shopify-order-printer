@@ -3,8 +3,8 @@ import { restResources } from '@shopify/shopify-api/rest/admin/2023-10'
 import { sessionStorage } from './session'
 
 export const shopify = shopifyApi({
-  apiKey: process.env.SHOPIFY_API_KEY!,
-  apiSecretKey: process.env.SHOPIFY_API_SECRET!,
+  apiKey: process.env.SHOPIFY_API_KEY || 'dummy-key',
+  apiSecretKey: process.env.SHOPIFY_API_SECRET || 'dummy-secret',
   scopes: [
     'read_orders',
     'read_customers', 
@@ -19,7 +19,7 @@ export const shopify = shopifyApi({
     'read_content',
     'write_content'
   ],
-  hostName: process.env.SHOPIFY_APP_URL!.replace(/https?:\/\//, ''),
+  hostName: (process.env.SHOPIFY_APP_URL || 'localhost:3000').replace(/https?:\/\//, ''),
   hostScheme: 'https',
   apiVersion: ApiVersion.October23,
   isEmbeddedApp: true,

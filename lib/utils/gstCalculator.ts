@@ -1,4 +1,5 @@
-import { GSTBreakdown, GSTCalculationContext, GSTCalculationResult, GSTRateConfig, HSNCodeMapping, StateMapping } from '../../types/gst';
+import { GSTCalculationContext, GSTCalculationResult, GSTRateConfig, HSNCodeMapping, StateMapping } from '../../types/gst';
+import { GSTBreakdown } from '../../types/shopify';
 
 // Default GST configuration for Indian textile business
 export const DEFAULT_GST_CONFIG: GSTRateConfig = {

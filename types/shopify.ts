@@ -465,6 +465,8 @@ export interface TemplateLayout {
   }
   showGSTBreakdown: boolean
   showHSNCodes: boolean
+  showBankDetails?: boolean
+  showLogo?: boolean
 }
 
 export interface TemplateField {
