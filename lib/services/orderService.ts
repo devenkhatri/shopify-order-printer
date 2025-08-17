@@ -256,3 +256,19 @@ export async function getOrdersWithGST(
 export async function getOrderById(session: Session, orderId: string): Promise<OrderWithGST | null> {
   return orderService.getOrderById(session, orderId);
 }
+
+export async function getOrdersByIds(session: Session, orderIds: string[]): Promise<OrderWithGST[]> {
+  try {
+    const orderGraphQLService = new OrderGraphQLService(session);
+    const orders = await orderGraphQLService.getOrdersByIds(orderIds);
+    
+    // Add GST breakdown to each order
+    const gstService = new GSTService();
+    const ordersWithGST = await gstService.addGSTToOrders(orders);
+    
+    return ordersWithGST;
+  } catch (error) {
+    console.error('Failed to fetch orders by IDs with GST:', error);
+    throw new Error(`Failed to fetch orders: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
+}
