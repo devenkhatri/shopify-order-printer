@@ -1,48 +1,54 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { shopify } from '@/lib/shopify'
+import { initiateOAuth, validateShopDomain } from '@/lib/auth'
 
 export async function GET(request: NextRequest) {
   try {
-    // Handle Shopify OAuth callback
+    // Handle OAuth initiation from query parameters
     const url = new URL(request.url)
     const shop = url.searchParams.get('shop')
-    const code = url.searchParams.get('code')
     
-    if (!shop || !code) {
-      return NextResponse.json({ error: 'Missing shop or code parameter' }, { status: 400 })
+    if (!shop) {
+      return NextResponse.json({ error: 'Shop parameter required' }, { status: 400 })
     }
 
-    // Exchange code for access token
-    const session = await shopify.auth.callback({
-      rawRequest: request,
-      rawResponse: NextResponse,
-    })
+    if (!validateShopDomain(shop)) {
+      return NextResponse.json({ error: 'Invalid shop domain' }, { status: 400 })
+    }
 
-    return NextResponse.redirect(new URL(`/?shop=${shop}`, request.url))
+    const result = await initiateOAuth(shop, request)
+    
+    if (!result.success) {
+      return NextResponse.json({ error: result.error }, { status: 400 })
+    }
+
+    // Redirect to Shopify OAuth page
+    return NextResponse.redirect(result.redirectUrl!)
   } catch (error) {
-    console.error('Auth error:', error)
-    return NextResponse.json({ error: 'Authentication failed' }, { status: 500 })
+    console.error('Auth initiation error:', error)
+    return NextResponse.json({ error: 'Failed to initiate authentication' }, { status: 500 })
   }
 }
 
 export async function POST(request: NextRequest) {
   try {
-    // Handle OAuth initiation
+    // Handle OAuth initiation from POST body
     const { shop } = await request.json()
     
     if (!shop) {
       return NextResponse.json({ error: 'Shop parameter required' }, { status: 400 })
     }
 
-    const authUrl = await shopify.auth.begin({
-      shop,
-      callbackPath: '/api/auth',
-      isOnline: false,
-      rawRequest: request,
-      rawResponse: NextResponse,
-    })
+    if (!validateShopDomain(shop)) {
+      return NextResponse.json({ error: 'Invalid shop domain' }, { status: 400 })
+    }
 
-    return NextResponse.json({ authUrl })
+    const result = await initiateOAuth(shop, request)
+    
+    if (!result.success) {
+      return NextResponse.json({ error: result.error }, { status: 400 })
+    }
+
+    return NextResponse.json({ authUrl: result.redirectUrl })
   } catch (error) {
     console.error('Auth initiation error:', error)
     return NextResponse.json({ error: 'Failed to initiate authentication' }, { status: 500 })

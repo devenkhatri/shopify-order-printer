@@ -14,14 +14,14 @@
   - Configure Next.js for embedded app with proper headers and CSP
   - _Requirements: 6.1, 6.3, 8.1_
 
-- [ ] 3. Implement Shopify Authentication and App Bridge Integration
-- [ ] 3.1 Set up Shopify OAuth flow
+- [x] 3. Implement Shopify Authentication and App Bridge Integration
+- [x] 3.1 Set up Shopify OAuth flow
   - Implement OAuth initiation route using Shopify's authentication flow
   - Create OAuth callback handler for token exchange
   - Set up session storage for Shopify tokens and shop data
   - _Requirements: 1.2, 6.4_
 
-- [ ] 3.2 Configure App Bridge provider
+- [x] 3.2 Configure App Bridge provider
   - Create root layout with AppBridgeProvider and Polaris AppProvider
   - Implement middleware for Shopify app authentication
   - Set up proper security headers for embedded app experience

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { shopify } from '@/lib/shopify'
+import { getSessionFromRequest } from '@/lib/auth'
 import { getOrderById } from '@/lib/services/orderService'
 
 interface RouteParams {
@@ -10,7 +10,7 @@ interface RouteParams {
 
 export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
-    const session = await shopify.session.getCurrentSession(request, NextResponse)
+    const session = await getSessionFromRequest(request)
     
     if (!session) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })

@@ -9,7 +9,7 @@ export async function POST(request: NextRequest) {
     const hmac = request.headers.get('x-shopify-hmac-sha256')
 
     // Verify webhook authenticity
-    const isValid = await shopify.webhooks.verify({
+    const isValid = await shopify.webhooks.validate({
       rawBody: body,
       rawRequest: request,
     })

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { shopify } from '@/lib/shopify'
+import { getSessionFromRequest } from '@/lib/auth'
 import { getOrdersWithGST } from '@/lib/services/orderService'
 
 export async function GET(request: NextRequest) {
@@ -10,7 +10,7 @@ export async function GET(request: NextRequest) {
     const status = url.searchParams.get('status')
     
     // Get session from request
-    const session = await shopify.session.getCurrentSession(request, NextResponse)
+    const session = await getSessionFromRequest(request)
     
     if (!session) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })

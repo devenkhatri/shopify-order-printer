@@ -1,13 +1,13 @@
-import { AppProvider } from '@/components/providers/AppProvider'
+import { AuthWrapper } from '@/components/auth/AuthWrapper'
 import { OrdersList } from '@/components/orders/OrdersList'
+import { Page } from '@shopify/polaris'
 
 export default function HomePage() {
   return (
-    <AppProvider>
-      <main className="container mx-auto p-4">
-        <h1 className="text-2xl font-bold mb-6">Order Printer - GST Compliant</h1>
+    <AuthWrapper>
+      <Page title="Order Printer - GST Compliant">
         <OrdersList />
-      </main>
-    </AppProvider>
+      </Page>
+    </AuthWrapper>
   )
 }

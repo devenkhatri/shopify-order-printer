@@ -8,7 +8,9 @@ export function middleware(request: NextRequest) {
     pathname.startsWith('/_next') ||
     pathname.startsWith('/api/auth') ||
     pathname.startsWith('/api/webhooks') ||
-    pathname.includes('.')
+    pathname.startsWith('/auth/error') ||
+    pathname.includes('.') ||
+    pathname === '/favicon.ico'
   ) {
     return NextResponse.next()
   }
@@ -17,32 +19,45 @@ export function middleware(request: NextRequest) {
   const shop = request.nextUrl.searchParams.get('shop')
   const host = request.nextUrl.searchParams.get('host')
 
-  // For embedded app, ensure we have shop and host parameters
+  // For embedded app, ensure we have shop parameter
   if (!shop && pathname !== '/') {
-    const redirectUrl = new URL('/api/auth', request.url)
-    return NextResponse.redirect(redirectUrl)
+    // Redirect to auth with current URL as return path
+    const authUrl = new URL('/api/auth', request.url)
+    const returnUrl = encodeURIComponent(request.url)
+    authUrl.searchParams.set('return_to', returnUrl)
+    return NextResponse.redirect(authUrl)
   }
 
-  // Set security headers for embedded app
+  // Create response with security headers for embedded app
   const response = NextResponse.next()
   
-  // Allow embedding in Shopify admin
+  // Security headers for Shopify embedded apps
   response.headers.set('X-Frame-Options', 'ALLOWALL')
+  response.headers.set('X-Content-Type-Options', 'nosniff')
+  response.headers.set('X-XSS-Protection', '1; mode=block')
+  response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin')
   
-  // Set CSP for Shopify embedded apps
-  response.headers.set(
-    'Content-Security-Policy',
-    [
-      "frame-ancestors https://*.myshopify.com https://admin.shopify.com",
-      "connect-src 'self' https://*.myshopify.com https://monorail-edge.shopifysvc.com",
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.shopify.com",
-      "style-src 'self' 'unsafe-inline' https://cdn.shopify.com",
-      "img-src 'self' data: https: blob:",
-      "font-src 'self' https://fonts.gstatic.com https://cdn.shopify.com",
-      "object-src 'none'",
-      "base-uri 'self'"
-    ].join('; ')
-  )
+  // Content Security Policy for Shopify embedded apps
+  const cspDirectives = [
+    "default-src 'self'",
+    "frame-ancestors https://*.myshopify.com https://admin.shopify.com",
+    "connect-src 'self' https://*.myshopify.com https://monorail-edge.shopifysvc.com wss://*.myshopify.com",
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.shopify.com https://*.shopifycdn.com",
+    "style-src 'self' 'unsafe-inline' https://cdn.shopify.com https://*.shopifycdn.com https://fonts.googleapis.com",
+    "img-src 'self' data: https: blob:",
+    "font-src 'self' https://fonts.gstatic.com https://cdn.shopify.com https://*.shopifycdn.com",
+    "media-src 'self' https: data:",
+    "object-src 'none'",
+    "base-uri 'self'",
+    "form-action 'self'"
+  ]
+  
+  response.headers.set('Content-Security-Policy', cspDirectives.join('; '))
+
+  // Add shop parameter to response headers for client-side access
+  if (shop) {
+    response.headers.set('X-Shopify-Shop', shop)
+  }
 
   return response
 }
@@ -56,7 +71,8 @@ export const config = {
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
+     * - auth/error (error pages)
      */
-    '/((?!api/auth|api/webhooks|_next/static|_next/image|favicon.ico).*)',
+    '/((?!api/auth|api/webhooks|auth/error|_next/static|_next/image|favicon.ico).*)',
   ],
 }

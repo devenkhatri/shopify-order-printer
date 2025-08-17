@@ -1,5 +1,6 @@
-import { shopifyApi } from '@shopify/shopify-api'
-import { restResources } from '@shopify/shopify-api/rest/admin/2024-07'
+import { shopifyApi, ApiVersion } from '@shopify/shopify-api'
+import { restResources } from '@shopify/shopify-api/rest/admin/2023-10'
+import { sessionStorage } from './session'
 
 export const shopify = shopifyApi({
   apiKey: process.env.SHOPIFY_API_KEY!,
@@ -20,7 +21,8 @@ export const shopify = shopifyApi({
   ],
   hostName: process.env.SHOPIFY_APP_URL!.replace(/https?:\/\//, ''),
   hostScheme: 'https',
-  apiVersion: '2024-07',
+  apiVersion: ApiVersion.October23,
   isEmbeddedApp: true,
   restResources,
+  sessionStorage,
 })

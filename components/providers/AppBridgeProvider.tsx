@@ -1,22 +1,46 @@
 'use client'
 
-import { ReactNode } from 'react'
-import { Provider as AppBridgeProvider as ShopifyAppBridgeProvider } from '@shopify/app-bridge-react'
+import { ReactNode, useEffect, useState } from 'react'
+import { useSearchParams } from 'next/navigation'
 
 interface AppBridgeProviderProps {
   children: ReactNode
 }
 
 export function AppBridgeProvider({ children }: AppBridgeProviderProps) {
-  const config = {
-    apiKey: process.env.NEXT_PUBLIC_SHOPIFY_API_KEY!,
-    host: typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('host') || '' : '',
-    forceRedirect: true,
+  const searchParams = useSearchParams()
+  const [isReady, setIsReady] = useState(false)
+
+  useEffect(() => {
+    const shop = searchParams.get('shop')
+    
+    if (!shop) {
+      // If no shop parameter, redirect to auth
+      window.location.href = `/api/auth?shop=${window.location.hostname}`
+      return
+    }
+
+    // Initialize App Bridge
+    const config = {
+      apiKey: process.env.NEXT_PUBLIC_SHOPIFY_API_KEY!,
+      host: searchParams.get('host') || btoa(`${shop}/admin`),
+      forceRedirect: true,
+    }
+    
+    // App Bridge initialization would go here
+    setIsReady(true)
+  }, [searchParams])
+
+  if (!isReady) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-2 text-sm text-gray-600">Initializing app...</p>
+        </div>
+      </div>
+    )
   }
 
-  return (
-    <ShopifyAppBridgeProvider config={config}>
-      {children}
-    </ShopifyAppBridgeProvider>
-  )
+  return <>{children}</>
 }
