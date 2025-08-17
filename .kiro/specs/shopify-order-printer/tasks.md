@@ -123,7 +123,7 @@
   - Implement proper error handling and file cleanup
   - _Requirements: 4.4, 4.6_
 
-- [ ] 11. Create CSV Export Service
+- [x] 11. Create CSV Export Service
   - Implement CSV generation with order data and GST breakdowns
   - Add all required fields including customer info, product details, and tax calculations
   - Create proper CSV formatting for Indian business requirements

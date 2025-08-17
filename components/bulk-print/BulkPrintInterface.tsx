@@ -25,13 +25,14 @@ import {
   EmptyState,
   Spinner,
   Modal,
-  TextContainer
+
 } from '@shopify/polaris'
 import { CalendarIcon, ExportIcon, PrintIcon } from '@shopify/polaris-icons'
 import { useOrders } from '@/hooks/useOrders'
 import { usePrint } from '@/hooks/usePrint'
 import { useBulkPrint, useDateRangeFilter } from '@/hooks/useBulkPrint'
 import { OrderWithGST, BulkPrintJob, BulkPrintRequest } from '@/types/shopify'
+import { CSVExportDialog } from '@/components/export/CSVExportDialog'
 
 
 
@@ -60,6 +61,7 @@ export function BulkPrintInterface() {
   // State for bulk operations
   const [bulkJob, setBulkJob] = useState<BulkPrintJob | null>(null)
   const [showProgressModal, setShowProgressModal] = useState(false)
+  const [showCSVExportDialog, setShowCSVExportDialog] = useState(false)
   const [toastActive, setToastActive] = useState(false)
   const [toastMessage, setToastMessage] = useState('')
   const [toastError, setToastError] = useState(false)
@@ -185,6 +187,12 @@ export function BulkPrintInterface() {
       return
     }
 
+    // For CSV exports, show the advanced export dialog
+    if (format === 'csv') {
+      setShowCSVExportDialog(true)
+      return
+    }
+
     try {
       setShowProgressModal(true)
       const orderIds = Array.from(selectedOrders)
@@ -213,6 +221,21 @@ export function BulkPrintInterface() {
       setShowProgressModal(false)
     }
   }, [selectedOrders, startBulkPrint, dateRange])
+
+  // CSV export handlers
+  const handleCSVExport = useCallback(() => {
+    if (selectedOrders.size === 0) {
+      setToastMessage('Please select at least one order to export')
+      setToastError(true)
+      setToastActive(true)
+      return
+    }
+    setShowCSVExportDialog(true)
+  }, [selectedOrders])
+
+  const handleCSVExportClose = useCallback(() => {
+    setShowCSVExportDialog(false)
+  }, [])
 
   // Create data table rows
   const tableRows = filteredOrders.map(order => {
@@ -426,7 +449,7 @@ export function BulkPrintInterface() {
           {
             content: 'Export CSV',
             icon: ExportIcon,
-            onAction: () => handleBulkPrint('csv'),
+            onAction: handleCSVExport,
             disabled: selectedOrders.size === 0 || printLoading
           }
         ]}
@@ -543,7 +566,7 @@ export function BulkPrintInterface() {
                     </Button>
                     <Button
                       icon={ExportIcon}
-                      onClick={() => handleBulkPrint('csv')}
+                      onClick={handleCSVExport}
                       loading={printLoading}
                     >
                       Export CSV
@@ -557,6 +580,18 @@ export function BulkPrintInterface() {
       </Page>
       {toastMarkup}
       {progressModal}
+      
+      {/* CSV Export Dialog */}
+      <CSVExportDialog
+        isOpen={showCSVExportDialog}
+        onClose={handleCSVExportClose}
+        orderIds={Array.from(selectedOrders)}
+        dateRange={{
+          from: dateRange.start.toISOString().split('T')[0],
+          to: dateRange.end.toISOString().split('T')[0]
+        }}
+        defaultStoreState="MH"
+      />
     </Frame>
   )
 }

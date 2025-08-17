@@ -173,36 +173,12 @@ async function generateOrderPDF(order: any, options: any): Promise<Buffer> {
   return Buffer.from(`PDF content for order ${order.name}`)
 }
 
-// Function to generate CSV data for an order
+// Function to generate CSV data for an order using the dedicated CSV service
 async function generateOrderCSVData(order: any, includeGSTBreakdown: boolean) {
-  const { formatOrderForCSV } = await import('@/lib/services/bulkPrintService')
+  const { csvExportService } = await import('@/lib/services/csvExportService')
   
-  // Use the utility function for basic order data
-  const orderData = formatOrderForCSV(order, includeGSTBreakdown)
-  
-  // Create detailed rows for each line item
-  const csvRows = []
-  
-  for (const lineItem of order.line_items) {
-    const row = {
-      ...orderData,
-      productName: lineItem.name,
-      variant: lineItem.variant_title || '',
-      sku: lineItem.sku || '',
-      quantity: lineItem.quantity,
-      unitPrice: parseFloat(lineItem.price),
-      lineTotal: parseFloat(lineItem.price) * lineItem.quantity,
-      vendor: lineItem.vendor || '',
-      productType: lineItem.product?.productType || '',
-      fulfillmentStatus: lineItem.fulfillment_status || 'unfulfilled',
-      taxable: lineItem.taxable ? 'Yes' : 'No',
-      requiresShipping: lineItem.requires_shipping ? 'Yes' : 'No'
-    }
-
-    csvRows.push(row)
-  }
-
-  return csvRows
+  // Use the dedicated CSV export service
+  return await csvExportService.generateOrderCSVData(order, includeGSTBreakdown)
 }
 
 // Function to combine multiple PDFs into one
@@ -219,9 +195,9 @@ async function combinePDFs(pdfBuffers: Buffer[], jobId: string): Promise<string>
   return downloadUrl
 }
 
-// Function to generate CSV file from data
+// Function to generate CSV file from data using the dedicated CSV service
 async function generateCSVFile(csvData: any[], jobId: string, groupByDate: boolean): Promise<string> {
-  const { generateCSVContent, storeGeneratedFile } = await import('@/lib/services/bulkPrintService')
+  const { storeGeneratedFile } = await import('@/lib/services/bulkPrintService')
   
   // Flatten all CSV rows
   const allRows = csvData.flat()
@@ -231,8 +207,41 @@ async function generateCSVFile(csvData: any[], jobId: string, groupByDate: boole
     allRows.sort((a, b) => new Date(a.orderDate).getTime() - new Date(b.orderDate).getTime())
   }
 
-  // Generate CSV content
-  const csvContent = generateCSVContent(allRows)
+  // Generate CSV content with proper headers for Indian business requirements
+  const headers = [
+    'Order Number', 'Order Date', 'Customer Name', 'Customer Email', 'Customer Phone',
+    'Shipping Address', 'Billing Address', 'Product Name', 'Variant', 'Quantity',
+    'Unit Price (₹)', 'Line Total (₹)', 'HSN Code', 'GST Type', 'GST Rate (%)',
+    'CGST Amount (₹)', 'SGST Amount (₹)', 'IGST Amount (₹)', 'Total GST (₹)', 'Total Amount (₹)'
+  ];
+
+  const csvRows = [
+    headers.join(','),
+    ...allRows.map((row: any) => [
+      row.orderNumber || '',
+      row.orderDate || '',
+      row.customerName || '',
+      row.customerEmail || '',
+      row.customerPhone || '',
+      `"${(row.shippingAddress || '').replace(/"/g, '""')}"`,
+      `"${(row.billingAddress || '').replace(/"/g, '""')}"`,
+      `"${(row.productName || '').replace(/"/g, '""')}"`,
+      row.variant || '',
+      row.quantity || 0,
+      (row.price || 0).toFixed(2),
+      (row.subtotal || 0).toFixed(2),
+      row.hsnCode || '',
+      row.gstType || '',
+      row.gstRate ? `${(row.gstRate * 100).toFixed(2)}%` : '',
+      (row.cgstAmount || 0).toFixed(2),
+      (row.sgstAmount || 0).toFixed(2),
+      (row.igstAmount || 0).toFixed(2),
+      (row.totalGstAmount || 0).toFixed(2),
+      (row.totalAmount || 0).toFixed(2)
+    ].join(','))
+  ];
+
+  const csvContent = csvRows.join('\n')
   
   // Store the file and get download URL
   const filename = `bulk_orders_${jobId}.csv`
