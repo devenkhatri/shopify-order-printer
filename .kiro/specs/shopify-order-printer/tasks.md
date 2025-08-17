@@ -28,7 +28,7 @@
   - Test app installation and embedding in Shopify admin
   - _Requirements: 1.1, 1.5, 6.2_
 
-- [ ] 4. Create Core Data Models and Types
+- [x] 4. Create Core Data Models and Types
   - Define TypeScript interfaces for Shopify order data structure
   - Create GST-specific types for Indian tax compliance
   - Implement template and app settings interfaces

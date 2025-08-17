@@ -1,4 +1,5 @@
 // Shopify-specific type definitions for the Order Printer app
+// Core data models and types for Indian T-shirt store GST compliance
 
 export interface ShopifyOrder {
   id: string
@@ -369,7 +370,10 @@ export interface ShippingLine {
   discount_allocations: DiscountAllocation[]
 }
 
-// App-specific types for GST calculations
+// =============================================================================
+// GST-SPECIFIC TYPES FOR INDIAN TAX COMPLIANCE
+// =============================================================================
+
 export interface GSTBreakdown {
   gstType: 'CGST_SGST' | 'IGST'
   gstRate: number
@@ -378,23 +382,60 @@ export interface GSTBreakdown {
   igstAmount?: number
   totalGstAmount: number
   taxableAmount: number
+  hsnCode?: string
+}
+
+export interface GSTConfiguration {
+  storeState: string
+  gstRates: {
+    lowRate: number // For orders < ₹1000
+    highRate: number // For orders >= ₹1000
+    threshold: number // ₹1000 threshold
+  }
+  hsnCodes: {
+    [productType: string]: string
+  }
+}
+
+export interface GSTCalculationInput {
+  orderTotal: number
+  subtotal: number
+  customerState: string
+  storeState: string
+  productType?: string
 }
 
 export interface OrderWithGST extends ShopifyOrder {
   gstBreakdown: GSTBreakdown
 }
 
-// Template types
+// T-shirt specific product details
+export interface TShirtDetails {
+  size: string
+  color: string
+  design?: string
+  material?: string
+  hsnCode: string
+}
+
+// =============================================================================
+// TEMPLATE AND APP SETTINGS INTERFACES
+// =============================================================================
+
 export interface Template {
   id: string
   name: string
+  isDefault: boolean
   layout: TemplateLayout
   businessInfo: BusinessInfo
+  fields: TemplateField[]
   createdAt: string
   updatedAt: string
 }
 
 export interface TemplateLayout {
+  pageSize: 'A4' | 'A5' | 'Letter'
+  orientation: 'portrait' | 'landscape'
   margins: {
     top: number
     right: number
@@ -404,14 +445,38 @@ export interface TemplateLayout {
   fonts: {
     primary: string
     secondary: string
+    size: {
+      header: number
+      body: number
+      footer: number
+    }
   }
   colors: {
     primary: string
     secondary: string
     text: string
+    background: string
   }
   logo?: {
     url: string
+    width: number
+    height: number
+    position: 'left' | 'center' | 'right'
+  }
+  showGSTBreakdown: boolean
+  showHSNCodes: boolean
+}
+
+export interface TemplateField {
+  id: string
+  name: string
+  type: 'text' | 'number' | 'date' | 'boolean' | 'image'
+  label: string
+  value?: any
+  required: boolean
+  position: {
+    x: number
+    y: number
     width: number
     height: number
   }
@@ -420,16 +485,56 @@ export interface TemplateLayout {
 export interface BusinessInfo {
   companyName: string
   gstin: string
-  address: string
-  city: string
-  state: string
-  pincode: string
-  phone: string
-  email: string
-  website?: string
+  address: {
+    line1: string
+    line2?: string
+    city: string
+    state: string
+    pincode: string
+    country: string
+  }
+  contact: {
+    phone: string
+    email: string
+    website?: string
+  }
+  bankDetails?: {
+    accountName: string
+    accountNumber: string
+    ifscCode: string
+    bankName: string
+  }
+  logo?: string
+  signature?: string
 }
 
-// Bulk print types
+export interface AppSettings {
+  id: string
+  shopDomain: string
+  gstConfiguration: GSTConfiguration
+  businessInfo: BusinessInfo
+  defaultTemplate: string
+  preferences: {
+    autoCalculateGST: boolean
+    showGSTInOrderList: boolean
+    defaultExportFormat: 'pdf' | 'csv'
+    dateFormat: string
+    currency: string
+    timezone: string
+  }
+  webhooks: {
+    ordersCreate: boolean
+    ordersUpdate: boolean
+    appUninstalled: boolean
+  }
+  createdAt: string
+  updatedAt: string
+}
+
+// =============================================================================
+// BULK PRINT AND EXPORT TYPES
+// =============================================================================
+
 export interface BulkPrintRequest {
   dateRange: {
     from: string
@@ -438,14 +543,245 @@ export interface BulkPrintRequest {
   orderIds: string[]
   format: 'pdf' | 'csv'
   templateId?: string
+  includeGSTBreakdown: boolean
+  groupByDate?: boolean
 }
 
 export interface BulkPrintJob {
   id: string
   status: 'pending' | 'processing' | 'completed' | 'failed'
   progress: number
+  totalOrders: number
+  processedOrders: number
   downloadUrl?: string
   error?: string
+  format: 'pdf' | 'csv'
   createdAt: string
   completedAt?: string
+  expiresAt?: string
+}
+
+export interface CSVExportData {
+  orderNumber: string
+  orderDate: string
+  customerName: string
+  customerEmail: string
+  customerPhone: string
+  shippingAddress: string
+  billingAddress: string
+  productName: string
+  variant: string
+  quantity: number
+  price: number
+  subtotal: number
+  gstType: string
+  gstRate: number
+  cgstAmount?: number
+  sgstAmount?: number
+  igstAmount?: number
+  totalGstAmount: number
+  totalAmount: number
+  hsnCode?: string
+}
+
+// =============================================================================
+// UTILITY TYPES FOR GRAPHQL RESPONSES AND METAFIELD DATA
+// =============================================================================
+
+export interface GraphQLResponse<T> {
+  data?: T
+  errors?: GraphQLError[]
+  extensions?: Record<string, any>
+}
+
+export interface GraphQLError {
+  message: string
+  locations?: Array<{
+    line: number
+    column: number
+  }>
+  path?: Array<string | number>
+  extensions?: Record<string, any>
+}
+
+export interface ShopifyMetafield {
+  id: string
+  namespace: string
+  key: string
+  value: string
+  type: 'string' | 'integer' | 'json_string' | 'boolean' | 'date' | 'url'
+  description?: string
+  createdAt: string
+  updatedAt: string
+}
+
+export interface MetafieldInput {
+  namespace: string
+  key: string
+  value: string
+  type: 'string' | 'integer' | 'json_string' | 'boolean' | 'date' | 'url'
+  description?: string
+}
+
+// GraphQL query response types
+export interface OrdersQueryResponse {
+  orders: {
+    edges: Array<{
+      node: ShopifyOrder
+      cursor: string
+    }>
+    pageInfo: {
+      hasNextPage: boolean
+      hasPreviousPage: boolean
+      startCursor: string
+      endCursor: string
+    }
+  }
+}
+
+export interface OrderQueryResponse {
+  order: ShopifyOrder | null
+}
+
+export interface ShopQueryResponse {
+  shop: {
+    id: string
+    name: string
+    email: string
+    domain: string
+    province: string
+    country: string
+    address1: string
+    address2?: string
+    city: string
+    zip: string
+    phone?: string
+    currencyCode: string
+    timezoneAbbreviation: string
+    metafields: {
+      edges: Array<{
+        node: ShopifyMetafield
+      }>
+    }
+  }
+}
+
+export interface ProductQueryResponse {
+  product: {
+    id: string
+    title: string
+    handle: string
+    productType: string
+    vendor: string
+    variants: {
+      edges: Array<{
+        node: {
+          id: string
+          title: string
+          sku: string
+          price: string
+          inventoryQuantity: number
+          selectedOptions: Array<{
+            name: string
+            value: string
+          }>
+          metafields: {
+            edges: Array<{
+              node: ShopifyMetafield
+            }>
+          }
+        }
+      }>
+    }
+    metafields: {
+      edges: Array<{
+        node: ShopifyMetafield
+      }>
+    }
+  }
+}
+
+// Pagination utility types
+export interface PaginationInfo {
+  hasNextPage: boolean
+  hasPreviousPage: boolean
+  startCursor: string
+  endCursor: string
+}
+
+export interface PaginatedResponse<T> {
+  data: T[]
+  pageInfo: PaginationInfo
+  totalCount?: number
+}
+
+// API Response wrapper types
+export interface ApiResponse<T> {
+  success: boolean
+  data?: T
+  error?: string
+  message?: string
+}
+
+export interface ApiError {
+  code: string
+  message: string
+  details?: Record<string, any>
+}
+
+// Webhook payload types
+export interface OrderWebhookPayload {
+  id: number
+  admin_graphql_api_id: string
+  created_at: string
+  updated_at: string
+  // ... other order fields
+}
+
+export interface AppUninstalledWebhookPayload {
+  id: number
+  name: string
+  email: string
+  domain: string
+  province: string
+  country: string
+  address1: string
+  address2?: string
+  city: string
+  zip: string
+  phone?: string
+}
+
+// Session and authentication types
+export interface ShopifySession {
+  id: string
+  shop: string
+  state: string
+  isOnline: boolean
+  scope?: string
+  expires?: Date
+  accessToken?: string
+  userId?: string
+}
+
+export interface AuthenticationResult {
+  session: ShopifySession
+  redirectUrl?: string
+}
+
+// File handling types
+export interface FileUpload {
+  filename: string
+  mimetype: string
+  encoding: string
+  size: number
+  buffer: Buffer
+}
+
+export interface GeneratedFile {
+  filename: string
+  buffer: Buffer
+  mimetype: string
+  size: number
+  downloadUrl?: string
 }
