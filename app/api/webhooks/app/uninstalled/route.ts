@@ -1,36 +1,42 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { shopify } from '@/lib/shopify'
+import { WebhookService } from '@/lib/services/webhookService'
 
 export async function POST(request: NextRequest) {
+  const startTime = Date.now()
+  let shop: string | undefined
+
   try {
     const body = await request.text()
-    const shop = request.headers.get('x-shopify-shop-domain')
-    const hmac = request.headers.get('x-shopify-hmac-sha256')
-
-    // Verify webhook authenticity
-    const isValid = await shopify.webhooks.validate({
-      rawBody: body,
-      rawRequest: request,
-    })
-
-    if (!isValid) {
+    
+    // Validate webhook with HMAC verification
+    const validation = await WebhookService.validateWebhook(request, body)
+    
+    if (!validation.isValid) {
       return NextResponse.json({ error: 'Unauthorized webhook' }, { status: 401 })
     }
 
-    const appData = JSON.parse(body)
+    shop = validation.shop!
+    const appData = validation.data
     
     console.log('App uninstalled for shop:', shop)
     
-    // Clean up app data according to Shopify policies
-    // This should include:
-    // - Removing stored session data
-    // - Cleaning up any cached order data
-    // - Removing app-specific metafields if necessary
-    
-    // TODO: Implement data cleanup logic
+    // Process app uninstallation with retry mechanism
+    await WebhookService.processWithRetry(async () => {
+      await WebhookService.handleAppUninstalled(appData, shop!)
+    })
+
+    const processingTime = Date.now() - startTime
+    WebhookService.logWebhookProcessing('app/uninstalled', shop, true, processingTime)
     
     return NextResponse.json({ success: true })
+    
   } catch (error) {
+    const processingTime = Date.now() - startTime
+    
+    if (shop) {
+      WebhookService.logWebhookProcessing('app/uninstalled', shop, false, processingTime, error as Error)
+    }
+    
     console.error('App uninstall webhook error:', error)
     return NextResponse.json({ error: 'Webhook processing failed' }, { status: 500 })
   }

@@ -130,15 +130,15 @@
   - Integrate with bulk print interface for date range exports
   - _Requirements: 4.5, 4.6_
 
-- [ ] 12. Implement Webhook Handlers
-- [ ] 12.1 Set up order webhooks
+- [x] 12. Implement Webhook Handlers
+- [x] 12.1 Set up order webhooks
   - Create webhook endpoints for orders/create and orders/updated
   - Implement proper webhook verification using HMAC
   - Add real-time order data synchronization
   - Create error handling and retry mechanisms for failed webhooks
   - _Requirements: 7.1, 7.2, 7.4, 8.2_
 
-- [ ] 12.2 Handle app lifecycle webhooks
+- [x] 12.2 Handle app lifecycle webhooks
   - Implement app/uninstalled webhook for data cleanup
   - Create proper data retention and deletion according to Shopify policies
   - Add webhook logging and monitoring

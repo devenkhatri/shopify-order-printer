@@ -33,6 +33,29 @@ class MemorySessionStorage {
     }
     return sessions
   }
+
+  async deleteAllSessionsForShop(shop: string): Promise<number> {
+    const sessions = await this.findSessionsByShop(shop)
+    const sessionIds = sessions.map(session => session.id)
+    
+    if (sessionIds.length > 0) {
+      await this.deleteSessions(sessionIds)
+    }
+    
+    return sessionIds.length
+  }
+
+  async getAllSessions(): Promise<Session[]> {
+    return Array.from(this.sessions.values())
+  }
+
+  async getSessionCount(): Promise<number> {
+    return this.sessions.size
+  }
+
+  async clearAllSessions(): Promise<void> {
+    this.sessions.clear()
+  }
 }
 
 export const sessionStorage = new MemorySessionStorage()
