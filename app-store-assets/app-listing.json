@@ -1,0 +1,180 @@
+{
+  "app_name": "Order Printer - Indian GST",
+  "tagline": "Professional order printing with automatic Indian GST compliance for T-shirt stores",
+  "description": "Transform your Indian T-shirt store's order management with automated GST calculations and professional printing capabilities. Built specifically for Indian businesses with CGST/SGST/IGST support, HSN codes, and textile-specific features.",
+  "category": "Store management",
+  "subcategory": "Orders and fulfillment",
+  "tags": [
+    "GST",
+    "India",
+    "Tax compliance",
+    "Order printing",
+    "PDF generation",
+    "CSV export",
+    "T-shirt",
+    "Textile",
+    "Bulk operations",
+    "Professional receipts"
+  ],
+  "key_features": [
+    "Automatic GST calculation (5% < ₹1000, 12% ≥ ₹1000)",
+    "CGST/SGST vs IGST determination based on location",
+    "HSN code support for textile products",
+    "Custom template editor with live preview",
+    "Bulk PDF generation for multiple orders",
+    "CSV export with GST breakdown",
+    "T-shirt specific product details (size, color, design)",
+    "GSTIN and Indian business information integration",
+    "Real-time order synchronization",
+    "Mobile-responsive interface"
+  ],
+  "target_audience": [
+    "Indian T-shirt stores",
+    "Textile businesses in India",
+    "Stores requiring GST compliance",
+    "High-volume order processors",
+    "Businesses wanting professional receipts"
+  ],
+  "supported_countries": ["India"],
+  "supported_languages": ["English", "Hindi"],
+  "pricing": {
+    "free_plan": {
+      "name": "Starter",
+      "price": "Free",
+      "features": [
+        "Up to 50 orders per month",
+        "Basic GST calculations",
+        "Standard templates",
+        "PDF generation",
+        "Email support"
+      ]
+    },
+    "paid_plan": {
+      "name": "Professional",
+      "price": "₹999/month",
+      "features": [
+        "Unlimited orders",
+        "Advanced template customization",
+        "Bulk operations",
+        "CSV export",
+        "Priority support",
+        "Custom branding",
+        "Advanced GST features"
+      ]
+    }
+  },
+  "installation_requirements": [
+    "Shopify store with admin access",
+    "Indian business registration (for GST features)",
+    "Modern web browser (Chrome, Firefox, Safari, Edge)"
+  ],
+  "permissions_required": [
+    "read_orders",
+    "read_customers",
+    "read_products",
+    "read_locations",
+    "write_files",
+    "read_content",
+    "write_content"
+  ],
+  "app_bridge_version": "3.7.7",
+  "polaris_version": "12.0.0",
+  "webhook_endpoints": [
+    "orders/create",
+    "orders/updated",
+    "orders/paid",
+    "app/uninstalled"
+  ],
+  "data_usage": {
+    "data_collected": [
+      "Order information",
+      "Customer details (for GST calculation)",
+      "Product information",
+      "Business information (GSTIN, address)",
+      "Template preferences"
+    ],
+    "data_usage": [
+      "GST calculation and compliance",
+      "Order document generation",
+      "Template customization",
+      "App functionality and features"
+    ],
+    "data_retention": "Data is retained as long as the app is installed. Upon uninstallation, all data is deleted within 30 days.",
+    "data_sharing": "No data is shared with third parties. All data remains within Shopify's secure infrastructure."
+  },
+  "gdpr_compliance": true,
+  "security_features": [
+    "OAuth 2.0 authentication",
+    "HMAC webhook verification",
+    "Encrypted data transmission",
+    "Secure session management",
+    "Regular security updates"
+  ],
+  "support_channels": [
+    {
+      "type": "Email",
+      "contact": "support@shopify-order-printer.com",
+      "response_time": "24 hours"
+    },
+    {
+      "type": "Documentation",
+      "url": "https://docs.shopify-order-printer.com"
+    },
+    {
+      "type": "Video Tutorials",
+      "url": "https://tutorials.shopify-order-printer.com"
+    }
+  ],
+  "app_store_optimization": {
+    "primary_keywords": [
+      "GST compliance",
+      "Indian tax",
+      "Order printing",
+      "T-shirt store",
+      "PDF generation"
+    ],
+    "secondary_keywords": [
+      "CGST SGST IGST",
+      "HSN code",
+      "Textile business",
+      "Bulk printing",
+      "Professional receipts"
+    ]
+  },
+  "competitive_advantages": [
+    "Only app specifically designed for Indian T-shirt stores",
+    "Automatic GST compliance with Indian tax laws",
+    "Built-in textile industry knowledge (HSN codes, sizing)",
+    "Native Shopify integration with Polaris UI",
+    "Bulk operations for high-volume processing",
+    "Professional template customization"
+  ],
+  "use_cases": [
+    {
+      "title": "GST Compliant Receipts",
+      "description": "Automatically generate order receipts with correct GST calculations, CGST/SGST/IGST breakdown, and HSN codes for textile products."
+    },
+    {
+      "title": "Bulk Order Processing",
+      "description": "Process multiple orders at once with bulk PDF generation and CSV export for accounting and record-keeping."
+    },
+    {
+      "title": "Professional Branding",
+      "description": "Create custom-branded order documents with business logo, GSTIN, and professional layout for enhanced customer experience."
+    },
+    {
+      "title": "Accounting Integration",
+      "description": "Export order data with detailed GST breakdown in CSV format for easy integration with accounting software."
+    }
+  ],
+  "technical_specifications": {
+    "framework": "Next.js 14",
+    "ui_library": "Shopify Polaris",
+    "api_integration": "Shopify GraphQL Admin API",
+    "authentication": "Shopify OAuth 2.0",
+    "database": "PostgreSQL (production), SQLite (development)",
+    "file_generation": "Puppeteer (PDF), csv-writer (CSV)",
+    "deployment": "Vercel/Railway with Docker support",
+    "monitoring": "Built-in health checks and error tracking"
+  }
+}

@@ -18,7 +18,17 @@
     "shopify:dev": "shopify app dev",
     "shopify:info": "shopify app info",
     "shopify:generate": "shopify app generate",
-    "shopify:deploy": "shopify app deploy"
+    "shopify:deploy": "shopify app deploy",
+    "deploy:production": "./scripts/deploy-production.sh",
+    "deploy:vercel": "vercel --prod",
+    "deploy:railway": "railway up",
+    "setup:ssl": "./scripts/setup-ssl.sh",
+    "setup:db": "node -e \"console.log('Run the SQL script in scripts/setup-production-db.sql on your production database')\"",
+    "docker:build": "docker build -t shopify-order-printer .",
+    "docker:run": "docker-compose -f docker-compose.production.yml up -d",
+    "docker:stop": "docker-compose -f docker-compose.production.yml down",
+    "health:check": "curl -f http://localhost:3000/api/webhooks/health?type=system || echo 'Health check failed'",
+    "logs:production": "docker-compose -f docker-compose.production.yml logs -f app"
   },
   "dependencies": {
     "@shopify/app-bridge": "^3.7.7",

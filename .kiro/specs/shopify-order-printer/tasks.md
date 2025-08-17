@@ -151,15 +151,15 @@
   - Create default template selection and app preferences
   - _Requirements: 5.5, 6.6, 7.3_
 
-- [ ] 14. Set up Production Deployment
-- [ ] 14.1 Configure production environment
+- [x] 14. Set up Production Deployment
+- [x] 14.1 Configure production environment
   - Set up production hosting (Vercel or Railway)
   - Configure production environment variables and secrets
   - Set up SSL certificates and domain configuration
   - Create production database and session storage
   - _Requirements: 6.7, 8.1_
 
-- [ ] 14.2 Prepare for Shopify App Store submission
+- [x] 14.2 Prepare for Shopify App Store submission
   - Create app listing with screenshots and descriptions
   - Implement proper error handling and user feedback
   - Add comprehensive logging and monitoring

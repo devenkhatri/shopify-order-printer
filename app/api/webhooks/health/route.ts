@@ -1,11 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { WebhookMonitoringService } from '@/lib/services/webhookMonitoringService'
+import { healthCheckHandler, monitor } from '@/lib/monitoring/production'
 
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
     const shop = searchParams.get('shop')
     const format = searchParams.get('format') || 'json'
+    const type = searchParams.get('type') || 'webhook'
+
+    // Production health check for load balancers and monitoring
+    if (type === 'system') {
+      return await healthCheckHandler()
+    }
 
     if (format === 'report') {
       // Return a human-readable health report
@@ -25,18 +32,25 @@ export async function GET(request: NextRequest) {
     const recentFailures = WebhookMonitoringService.getRecentFailures(shop || undefined, 10)
     const isHealthy = WebhookMonitoringService.isWebhookHealthy(shop || undefined)
 
+    // Get system health for comprehensive monitoring
+    const systemHealth = await monitor.performHealthCheck()
+
     return NextResponse.json({
       shop: shop || 'all',
-      healthy: isHealthy,
-      overall: healthStatus,
-      byTopic: statsByTopic,
-      recentFailures
+      healthy: isHealthy && systemHealth.status === 'healthy',
+      webhook: {
+        healthy: isHealthy,
+        overall: healthStatus,
+        byTopic: statsByTopic,
+        recentFailures
+      },
+      system: systemHealth
     })
 
   } catch (error) {
-    console.error('Error getting webhook health:', error)
+    monitor.logError(error as Error, { endpoint: '/api/webhooks/health', shop })
     return NextResponse.json(
-      { error: 'Failed to get webhook health status' },
+      { error: 'Failed to get health status' },
       { status: 500 }
     )
   }

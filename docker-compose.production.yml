@@ -1,0 +1,96 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        SHOPIFY_API_KEY: ${SHOPIFY_API_KEY}
+        NEXT_PUBLIC_SHOPIFY_API_KEY: ${NEXT_PUBLIC_SHOPIFY_API_KEY}
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - SHOPIFY_API_KEY=${SHOPIFY_API_KEY}
+      - SHOPIFY_API_SECRET=${SHOPIFY_API_SECRET}
+      - SHOPIFY_APP_URL=${SHOPIFY_APP_URL}
+      - SHOPIFY_WEBHOOK_SECRET=${SHOPIFY_WEBHOOK_SECRET}
+      - NEXT_PUBLIC_SHOPIFY_API_KEY=${NEXT_PUBLIC_SHOPIFY_API_KEY}
+      - SESSION_SECRET=${SESSION_SECRET}
+      - DATABASE_URL=${DATABASE_URL}
+      - DEFAULT_STORE_STATE=${DEFAULT_STORE_STATE:-Gujarat}
+      - LOG_LEVEL=${LOG_LEVEL:-warn}
+    volumes:
+      - uploads:/app/uploads
+      - ./database.sqlite:/app/database.sqlite
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/webhooks/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    depends_on:
+      - db
+    networks:
+      - shopify-network
+
+  db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-shopify_order_printer}
+      POSTGRES_USER: ${POSTGRES_USER:-shopify_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/setup-production-db.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-shopify_user} -d ${POSTGRES_DB:-shopify_order_printer}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - shopify-network
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+    networks:
+      - shopify-network
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - app
+    restart: unless-stopped
+    networks:
+      - shopify-network
+
+volumes:
+  postgres_data:
+  redis_data:
+  uploads:
+
+networks:
+  shopify-network:
+    driver: bridge
