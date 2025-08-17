@@ -1,66 +1,118 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { getSessionFromRequest } from '@/lib/auth'
-import { getGeneratedFile } from '@/lib/services/bulkPrintService'
+import { NextRequest, NextResponse } from 'next/server';
+import { FileStorageService } from '../../../../../lib/services/fileStorageService';
+import { getSession } from '../../../../../lib/session';
 
 export async function GET(
   request: NextRequest,
   { params }: { params: { fileKey: string } }
 ) {
   try {
-    const session = await getSessionFromRequest(request)
-    
+    const session = await getSession(request);
     if (!session) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return NextResponse.json(
+        { success: false, error: 'Unauthorized' },
+        { status: 401 }
+      );
     }
 
-    const { fileKey } = params
+    const { fileKey } = params;
 
     if (!fileKey) {
-      return NextResponse.json({ error: 'File key is required' }, { status: 400 })
+      return NextResponse.json(
+        { success: false, error: 'File key is required' },
+        { status: 400 }
+      );
     }
 
-    const file = await getGeneratedFile(fileKey)
+    // Initialize file storage service
+    const fileStorageService = new FileStorageService(session);
 
-    if (!file) {
-      return NextResponse.json({ error: 'File not found or expired' }, { status: 404 })
+    // Get file buffer
+    const fileResult = await fileStorageService.getFileBuffer(fileKey);
+
+    if (!fileResult.success) {
+      const status = fileResult.error === 'File not found' ? 404 : 
+                    fileResult.error === 'File has expired' ? 410 : 500;
+      
+      return NextResponse.json(
+        { success: false, error: fileResult.error },
+        { status }
+      );
     }
 
-    // Determine content type based on file extension
-    let contentType = file.contentType
-    if (!contentType) {
-      if (fileKey.endsWith('.pdf')) {
-        contentType = 'application/pdf'
-      } else if (fileKey.endsWith('.csv')) {
-        contentType = 'text/csv'
-      } else {
-        contentType = 'application/octet-stream'
-      }
-    }
-
-    // Convert content to buffer if it's a string
-    const content = typeof file.content === 'string' 
-      ? Buffer.from(file.content, 'utf-8')
-      : file.content
-
-    // Set appropriate headers for file download
-    const headers = new Headers({
-      'Content-Type': contentType,
-      'Content-Disposition': `attachment; filename="${file.filename}"`,
-      'Content-Length': content.length.toString(),
-      'Cache-Control': 'private, no-cache, no-store, must-revalidate',
-      'Expires': '0',
-      'Pragma': 'no-cache'
-    })
-
-    return new NextResponse(content, {
+    // Return file as response
+    return new NextResponse(fileResult.buffer as BodyInit, {
       status: 200,
-      headers
-    })
+      headers: {
+        'Content-Type': fileResult.contentType || 'application/octet-stream',
+        'Content-Disposition': `attachment; filename="${fileResult.filename}"`,
+        'Content-Length': fileResult.buffer!.length.toString(),
+        'Cache-Control': 'private, max-age=3600', // Cache for 1 hour
+      },
+    });
+
   } catch (error) {
-    console.error('Download file error:', error)
-    return NextResponse.json({ 
-      error: 'Failed to download file',
-      details: error instanceof Error ? error.message : 'Unknown error'
-    }, { status: 500 })
+    console.error('File download error:', error);
+    return NextResponse.json(
+      { 
+        success: false, 
+        error: error instanceof Error ? error.message : 'Internal server error' 
+      },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: { fileKey: string } }
+) {
+  try {
+    const session = await getSession(request);
+    if (!session) {
+      return NextResponse.json(
+        { success: false, error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
+    const { fileKey } = params;
+
+    if (!fileKey) {
+      return NextResponse.json(
+        { success: false, error: 'File key is required' },
+        { status: 400 }
+      );
+    }
+
+    // Initialize file storage service
+    const fileStorageService = new FileStorageService(session);
+
+    // Delete file
+    const deleteResult = await fileStorageService.deleteFile(fileKey);
+
+    if (!deleteResult.success) {
+      const status = deleteResult.error === 'File not found' ? 404 : 500;
+      
+      return NextResponse.json(
+        { success: false, error: deleteResult.error },
+        { status }
+      );
+    }
+
+    return NextResponse.json({
+      success: true,
+      message: 'File deleted successfully'
+    });
+
+  } catch (error) {
+    console.error('File deletion error:', error);
+    return NextResponse.json(
+      { 
+        success: false, 
+        error: error instanceof Error ? error.message : 'Internal server error' 
+      },
+      { status: 500 }
+    );
   }
 }

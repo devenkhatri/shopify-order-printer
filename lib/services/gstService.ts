@@ -119,7 +119,7 @@ export class GSTService {
       const result = calculateGST(context);
 
       if (!result.success) {
-        throw new Error(`GST calculation failed: ${result.error}`);
+        throw new Error(`GST calculation failed: ${(result as any).error}`);
       }
 
       return result.breakdown;
@@ -174,7 +174,7 @@ export class GSTService {
       const result = calculateGST(context);
 
       if (!result.success) {
-        throw new Error(`GST calculation failed for line item ${lineItem.id}: ${result.error}`);
+        throw new Error(`GST calculation failed for line item ${lineItem.id}: ${(result as any).error}`);
       }
 
       lineItemResults.push({

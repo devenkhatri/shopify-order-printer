@@ -249,6 +249,7 @@ export function extractTShirtDetails(lineItem: LineItem): {
   color?: string
   design?: string
   material?: string
+  hsnCode?: string
 } {
   const details: any = {}
   
@@ -263,6 +264,8 @@ export function extractTShirtDetails(lineItem: LineItem): {
       details.design = prop.value
     } else if (key.includes('material') || key.includes('fabric')) {
       details.material = prop.value
+    } else if (key.includes('hsn') || key.includes('harmonized')) {
+      details.hsnCode = prop.value
     }
   })
 
@@ -280,6 +283,11 @@ export function extractTShirtDetails(lineItem: LineItem): {
         details.color = trimmed
       }
     })
+  }
+
+  // Add HSN code if not found in properties
+  if (!details.hsnCode) {
+    details.hsnCode = getHSNCode(lineItem)
   }
 
   return details
@@ -400,4 +408,95 @@ export function getHSNCode(lineItem: LineItem): string {
   
   // Default HSN code for textile products (T-shirts)
   return '6109' // HSN code for T-shirts, singlets and other vests, knitted or crocheted
+}
+
+/**
+ * Format currency amount with Indian Rupee symbol
+ */
+export function formatCurrency(amount: number, currency: string = 'INR'): string {
+  if (currency === 'INR') {
+    return `₹${amount.toFixed(2)}`
+  }
+  
+  return new Intl.NumberFormat('en-IN', {
+    style: 'currency',
+    currency: currency,
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  }).format(amount)
+}
+
+/**
+ * Format date in various formats
+ */
+export function formatDate(dateString: string, format: string = 'DD/MM/YYYY'): string {
+  const date = new Date(dateString)
+  
+  if (isNaN(date.getTime())) {
+    return 'Invalid Date'
+  }
+  
+  const day = date.getDate().toString().padStart(2, '0')
+  const month = (date.getMonth() + 1).toString().padStart(2, '0')
+  const year = date.getFullYear()
+  const hours = date.getHours().toString().padStart(2, '0')
+  const minutes = date.getMinutes().toString().padStart(2, '0')
+  
+  switch (format) {
+    case 'DD/MM/YYYY':
+      return `${day}/${month}/${year}`
+    case 'MM/DD/YYYY':
+      return `${month}/${day}/${year}`
+    case 'YYYY-MM-DD':
+      return `${year}-${month}-${day}`
+    case 'DD MMM YYYY':
+      const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+                         'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+      return `${day} ${monthNames[date.getMonth()]} ${year}`
+    case 'DD/MM/YYYY HH:mm':
+      return `${day}/${month}/${year} ${hours}:${minutes}`
+    default:
+      return `${day}/${month}/${year}`
+  }
+}
+
+/**
+ * Generate filename for PDF with timestamp
+ */
+export function generatePDFFilename(prefix: string, orderId?: string): string {
+  const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5)
+  const orderPart = orderId ? `_${orderId}` : ''
+  return `${prefix}${orderPart}_${timestamp}.pdf`
+}
+
+/**
+ * Validate order data for PDF generation
+ */
+export function validateOrderForPDF(order: ShopifyOrder): { isValid: boolean; errors: string[] } {
+  const errors: string[] = []
+  
+  if (!order.id) {
+    errors.push('Order ID is required')
+  }
+  
+  if (!order.order_number) {
+    errors.push('Order number is required')
+  }
+  
+  if (!order.created_at) {
+    errors.push('Order creation date is required')
+  }
+  
+  if (!order.line_items || order.line_items.length === 0) {
+    errors.push('Order must have at least one line item')
+  }
+  
+  if (!order.total_price || parseFloat(order.total_price) <= 0) {
+    errors.push('Order total must be greater than 0')
+  }
+  
+  return {
+    isValid: errors.length === 0,
+    errors
+  }
 }

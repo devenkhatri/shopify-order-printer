@@ -108,15 +108,15 @@
   - Add job status tracking and download link generation
   - _Requirements: 4.4, 4.5, 4.6_
 
-- [ ] 10. Implement PDF Generation Service
-- [ ] 10.1 Create PDF generation with Indian compliance
+- [x] 10. Implement PDF Generation Service
+- [x] 10.1 Create PDF generation with Indian compliance
   - Build PDF service using puppeteer or similar library
   - Implement template rendering with GST breakdown display
   - Add HSN codes and Indian business information to PDF output
   - Create proper formatting for T-shirt product details
   - _Requirements: 4.4, 5.3, 5.4_
 
-- [ ] 10.2 Integrate PDF service with Shopify file handling
+- [x] 10.2 Integrate PDF service with Shopify file handling
   - Implement file storage and download through Shopify's file system
   - Create PDF preview functionality for template testing
   - Add bulk PDF generation with multiple orders in single file

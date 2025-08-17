@@ -247,7 +247,7 @@ export function calculateGSTLegacy(
   const result = calculateGST(context);
   
   if (!result.success) {
-    throw new Error(result.error);
+    throw new Error((result as any).error);
   }
 
   return result.breakdown;
