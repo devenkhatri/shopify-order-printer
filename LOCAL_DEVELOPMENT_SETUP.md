@@ -368,25 +368,31 @@ curl http://localhost:3000/api/webhooks/health
 
 ## Troubleshooting
 
-### Common Issues
+For detailed troubleshooting information, see **[TROUBLESHOOTING.md](./TROUBLESHOOTING.md)**.
 
-#### 1. "SHOPIFY_API_KEY is not defined"
+### Quick Fixes for Common Issues
+
+#### 1. "createContext is not a function" Error
+
+```bash
+# Clear Next.js cache and restart
+rm -rf .next
+npm run dev
+```
+
+#### 2. "SHOPIFY_API_KEY is not defined"
 
 **Solution**: Ensure `SHOPIFY_API_KEY` and `NEXT_PUBLIC_SHOPIFY_API_KEY` are set in `.env.local`
 
-#### 2. "Session secret is not defined"
+#### 3. "Session secret is not defined"
 
 **Solution**: Generate and set a strong `SESSION_SECRET` in `.env.local`
 
-#### 3. "Database connection failed"
+#### 4. "Database connection failed"
 
 **Solution**: 
 - For SQLite: Ensure the app has write permissions in the project directory
 - For PostgreSQL/MySQL: Verify database is running and credentials are correct
-
-#### 4. "Webhook verification failed"
-
-**Solution**: Ensure `SHOPIFY_WEBHOOK_SECRET` matches the secret in your Partner Dashboard
 
 #### 5. "App not loading in Shopify admin"
 

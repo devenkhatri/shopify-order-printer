@@ -1,7 +1,7 @@
 'use client';
 
 import React, { Component, ErrorInfo, ReactNode } from 'react';
-import { Banner, Button, Card, Layout, Page, Stack, Text } from '@shopify/polaris';
+import { Banner, Button, Card, Layout, Page, BlockStack, InlineStack, Text } from '@shopify/polaris';
 import { monitor } from '../monitoring/production';
 
 interface Props {
@@ -65,10 +65,10 @@ export class AppErrorBoundary extends Component<Props, State> {
           <Layout>
             <Layout.Section>
               <Card>
-                <Stack vertical spacing="loose">
+                <BlockStack gap="400">
                   <Banner
                     title="Application Error"
-                    status="critical"
+                    tone="critical"
                     onDismiss={undefined}
                   >
                     <Text as="p">
@@ -77,20 +77,20 @@ export class AppErrorBoundary extends Component<Props, State> {
                     </Text>
                   </Banner>
 
-                  <Stack distribution="leading" spacing="tight">
+                  <InlineStack gap="200">
                     <Button onClick={this.handleRetry}>Try Again</Button>
-                    <Button onClick={this.handleReload} outline>
+                    <Button onClick={this.handleReload} variant="secondary">
                       Reload Page
                     </Button>
-                  </Stack>
+                  </InlineStack>
 
                   {process.env.NODE_ENV === 'development' && this.state.error && (
-                    <Card sectioned>
-                      <Stack vertical spacing="tight">
+                    <Card>
+                      <BlockStack gap="200">
                         <Text as="h3" variant="headingMd">
                           Error Details (Development Only)
                         </Text>
-                        <Text as="p" color="critical">
+                        <Text as="p" tone="critical">
                           {this.state.error.message}
                         </Text>
                         <pre style={{ fontSize: '12px', overflow: 'auto' }}>
@@ -101,10 +101,10 @@ export class AppErrorBoundary extends Component<Props, State> {
                             {this.state.errorInfo.componentStack}
                           </pre>
                         )}
-                      </Stack>
+                      </BlockStack>
                     </Card>
                   )}
-                </Stack>
+                </BlockStack>
               </Card>
             </Layout.Section>
           </Layout>
@@ -219,7 +219,7 @@ export function ErrorDisplay({
   return (
     <Banner
       title={title}
-      status="critical"
+      tone="critical"
       action={action}
       onDismiss={onDismiss}
     >

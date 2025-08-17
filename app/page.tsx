@@ -1,13 +1,21 @@
-import { AuthWrapper } from '@/components/auth/AuthWrapper'
-import { OrdersList } from '@/components/orders/OrdersList'
-import { Page } from '@shopify/polaris'
+import dynamic from 'next/dynamic'
+
+// Dynamically import the client component to prevent SSR issues with Polaris
+const ClientHomePage = dynamic(
+  () => import('@/components/ClientHomePage'),
+  { 
+    ssr: false,
+    loading: () => (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-2 text-sm text-gray-600">Loading application...</p>
+        </div>
+      </div>
+    )
+  }
+)
 
 export default function HomePage() {
-  return (
-    <AuthWrapper>
-      <Page title="Order Printer - GST Compliant">
-        <OrdersList />
-      </Page>
-    </AuthWrapper>
-  )
+  return <ClientHomePage />
 }

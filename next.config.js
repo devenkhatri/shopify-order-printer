@@ -1,5 +1,16 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Transpile Shopify Polaris and related packages for proper SSR support
+  transpilePackages: [
+    '@shopify/polaris',
+    '@shopify/app-bridge',
+    '@shopify/app-bridge-react'
+  ],
+  
+  // Experimental features for better React 18 support
+  experimental: {
+    esmExternals: 'loose',
+  },
   // Configure for Shopify embedded app
   async headers() {
     return [
