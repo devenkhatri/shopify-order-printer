@@ -1,0 +1,31 @@
+# Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
+
+client_id = "177dbf4f95fe4669162193a70899395e"
+name = "order-printer-pdf-csv"
+handle = "order-printer-pdf-csv"
+application_url = "https://example.com/"
+embedded = true
+
+[build]
+include_config_on_deploy = true
+
+[webhooks]
+api_version = "2025-07"
+
+[[webhooks.subscriptions]]
+topics = [ "orders/create", "orders/updated", "orders/paid" ]
+uri = "/api/webhooks/orders"
+
+[[webhooks.subscriptions]]
+topics = [ "app/uninstalled" ]
+uri = "/api/webhooks/app/uninstalled"
+
+[access_scopes]
+# Scopes required for Indian T-shirt store order management and GST compliance
+scopes = "read_orders,read_customers,read_products,read_product_listings,read_inventory,read_locations,read_shipping,read_analytics,read_reports,write_files,read_content,write_content"
+
+[auth]
+redirect_urls = [ "https://example.com/api/auth" ]
+
+[pos]
+embedded = false

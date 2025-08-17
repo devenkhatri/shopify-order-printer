@@ -1,6 +1,6 @@
 # Implementation Plan
 
-- [ ] 1. Initialize Shopify Native App Project
+- [x] 1. Initialize Shopify Native App Project
   - Create new Shopify app using Shopify CLI with Next.js template
   - Configure shopify.app.toml with app settings, scopes, and webhooks
   - Set up development environment with ngrok for local testing
