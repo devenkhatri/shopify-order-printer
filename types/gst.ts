@@ -40,6 +40,7 @@ export interface GSTCalculationContext {
   productType?: string;
   hsnCode?: string;
   isExempt?: boolean;
+  orderId?: string;
 }
 
 export interface GSTAuditTrail {

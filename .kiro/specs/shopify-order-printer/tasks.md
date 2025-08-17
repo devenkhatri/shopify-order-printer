@@ -49,15 +49,15 @@
   - Add pagination support for large order lists
   - _Requirements: 1.3, 4.2_
 
-- [ ] 6. Implement GST Calculation Service
-- [ ] 6.1 Create core GST calculation logic
+- [x] 6. Implement GST Calculation Service
+- [x] 6.1 Create core GST calculation logic
   - Implement tax rate determination based on order total (5% < ₹1000, 12% ≥ ₹1000)
   - Create CGST/SGST vs IGST logic based on customer and store state comparison
   - Add HSN code handling for textile products from product metafields
   - Write unit tests for all GST calculation scenarios
   - _Requirements: 3.1, 3.2, 3.3, 3.4, 5.3_
 
-- [ ] 6.2 Integrate GST calculations with Shopify order data
+- [x] 6.2 Integrate GST calculations with Shopify order data
   - Create service to extract customer and store address information
   - Implement GST breakdown generation for individual orders
   - Add support for multiple line items with different tax rates
