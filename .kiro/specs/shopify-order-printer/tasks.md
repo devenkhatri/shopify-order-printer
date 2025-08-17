@@ -79,14 +79,14 @@
   - _Requirements: 2.1, 2.2, 2.4, 2.5_
 
 - [ ] 8. Create Order Management Interface
-- [ ] 8.1 Build orders list page with Polaris DataTable
+- [x] 8.1 Build orders list page with Polaris DataTable
   - Create orders page using Polaris DataTable component
   - Implement order filtering and search functionality
   - Add GST breakdown display for each order
   - Create order detail view with full customer and product information
   - _Requirements: 1.4, 3.5, 5.1_
 
-- [ ] 8.2 Implement order actions and navigation
+- [x] 8.2 Implement order actions and navigation
   - Add individual order printing functionality
   - Create navigation between orders, templates, and bulk print pages
   - Implement order status indicators and customer information display

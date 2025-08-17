@@ -1,13 +1,22 @@
+'use client'
+
+import { useRouter } from 'next/navigation'
 import { AppProvider } from '@/components/providers/AppProvider'
+import { AppLayout } from '@/components/layout/AppLayout'
 import { OrdersList } from '@/components/orders/OrdersList'
 
 export default function OrdersPage() {
+  const router = useRouter()
+
+  const handleOrderSelect = (orderId: string) => {
+    router.push(`/orders/${orderId}`)
+  }
+
   return (
     <AppProvider>
-      <div className="container mx-auto p-4">
-        <h1 className="text-2xl font-bold mb-6">Orders Management</h1>
-        <OrdersList />
-      </div>
+      <AppLayout>
+        <OrdersList onOrderSelect={handleOrderSelect} />
+      </AppLayout>
     </AppProvider>
   )
 }
