@@ -35,14 +35,14 @@
   - Set up utility types for GraphQL responses and metafield data
   - _Requirements: 3.5, 5.4, 6.6_
 
-- [ ] 5. Build Shopify GraphQL Integration Service
-- [ ] 5.1 Implement GraphQL client setup
+- [x] 5. Build Shopify GraphQL Integration Service
+- [x] 5.1 Implement GraphQL client setup
   - Create authenticated GraphQL client using Shopify Admin API
   - Implement error handling for GraphQL queries and mutations
   - Set up rate limiting and retry logic for API calls
   - _Requirements: 1.3, 6.5_
 
-- [ ] 5.2 Create order fetching functionality
+- [x] 5.2 Create order fetching functionality
   - Write GraphQL queries for fetching orders with customer and line item data
   - Implement order filtering by date range and status
   - Create single order detail fetching with full product information
